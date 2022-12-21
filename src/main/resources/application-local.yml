@@ -1,0 +1,54 @@
+server.port: 8085
+server.servlet.context-path: /master
+#spring.main.allow-circular-references: true
+#spring.cloud.compatibility-verifier.enabled: false
+#spring.thymeleaf.check-template-location: false
+
+logging.file.name: /home/ubuntu/logs/app/app.log
+logging.level.com.example: DEBUG
+logging.level.org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+spring:
+  redis:
+    host: localhost
+    port: 6379
+  datasource:
+    url: jdbc:mysql://localhost:3306/dev?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: P@ssw0rd
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+  devtools: 
+    add-properties: true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        enable_lazy_load_no_trans: true
+        format_sql: false
+        show_sql: true
+        hbm2ddl:
+          auto: update
+        proc:
+          param_null_passing: true
+  logging:
+   level:
+     org:
+       hibernate:
+         type: trace
+  mail:
+    default-encoding: UTF-8
+    host: mail.test.com
+    username: testhrms@test.com
+    password: '****'
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: false
+        transport:
+          protocol: smtp
