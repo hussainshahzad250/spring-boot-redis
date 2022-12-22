@@ -1,64 +1,63 @@
 package com.example.service;
 
-import com.example.Constant;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.example.assembler.PincodeAssembler;
+import com.example.constant.Constant;
 import com.example.dto.PincodeRequest;
 import com.example.dto.PincodeResponse;
 import com.example.entity.Pincode;
+import com.example.exception.BadRequestException;
 import com.example.repository.PincodeRepository;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
-import java.util.Optional;
-
-@Slf4j
 @Service
 public class PincodeServiceImpl implements PincodeService, Constant {
 
-    @Autowired
-    private PincodeAssembler pincodeAssembler;
+	@Autowired
+	private PincodeAssembler pincodeAssembler;
 
-    @Autowired
-    private PincodeRepository pincodeRepository;
+	@Autowired
+	private PincodeRepository pincodeRepository;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
 
-    private HashOperations<String, Long, PincodeResponse> operations;
+	private HashOperations<String, String, String> operations;
 
-    @PostConstruct
-    private void initializeHashOperation() {
-        operations = redisTemplate.opsForHash();
-    }
+	@PostConstruct
+	private void initializeHashOperation() {
+		operations = redisTemplate.opsForHash();
+	}
 
-    @Override
-    public PincodeResponse addPincode(PincodeRequest pincodeRequest) throws Exception {
-        Optional<Pincode> optional = pincodeRepository.findByPincode(pincodeRequest.getPincode());
-        if (optional.isPresent())
-            throw new Exception("pincode already exist");
-        Pincode pincode = pincodeAssembler.dtoToEntity(pincodeRequest);
-        pincodeRepository.save(pincode);
-        PincodeResponse response = pincodeAssembler.entityToDto(pincode);
-        operations.put(PINCODE, pincode.getId(), response);
-        return response;
-    }
+	@Override
+	public PincodeResponse addPincode(PincodeRequest pincodeRequest) throws Exception {
+		Optional<Pincode> optional = pincodeRepository.findByPincode(pincodeRequest.getPincode());
+		if (optional.isPresent())
+			throw new BadRequestException("pincode already exist", HttpStatus.BAD_REQUEST);
+		Pincode pincode = pincodeAssembler.dtoToEntity(pincodeRequest);
+		pincodeRepository.save(pincode);
+		PincodeResponse response = pincodeAssembler.entityToDto(pincode);
+		operations.put(PINCODE, response.getPincode(), response.getPincode());
+		return response;
+	}
 
-    @Override
-    public PincodeResponse getPincode(Long pinCode) throws Exception {
-        Optional<Pincode> optional = pincodeRepository.findById(pinCode);
-        if (optional.isPresent()) {
-            Pincode pincode = optional.get();
-            PincodeResponse response = pincodeAssembler.entityToDto(pincode);
-            operations.put(PINCODE, response.getId(), response);
-            return response;
-        }
-        throw new Exception("No Data found");
-    }
+	@Override
+	public PincodeResponse getPincode(String pinCode) throws Exception {
+		Optional<Pincode> optional = pincodeRepository.findByPincode(pinCode);
+		if (optional.isPresent()) {
+			Pincode pincode = optional.get();
+			PincodeResponse response = pincodeAssembler.entityToDto(pincode);
+			operations.put(PINCODE, response.getPincode(), response.getPincode());
+			return response;
+		}
+		throw new BadRequestException("pincode not exist", HttpStatus.BAD_REQUEST);
+	}
 }

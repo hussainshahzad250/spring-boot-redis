@@ -18,7 +18,7 @@ spring:
     password: P@ssw0rd
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 50
   devtools: 
     add-properties: true
   jpa:
