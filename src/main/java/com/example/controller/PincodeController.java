@@ -16,6 +16,8 @@ import com.example.service.PincodeService;
 
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/pincode")
@@ -33,6 +35,11 @@ public class PincodeController {
 	@GetMapping("/{pincode}")
 	public PincodeResponse getPincode(@PathVariable("pincode") String pincode) throws Exception {
 		return pincodeService.getPincode(pincode);
+	}
+
+	@GetMapping("/{pincode}/{cityName}")
+	public List<PincodeResponse> getPincodeAndCity(@PathVariable("pincode") String pincode, @PathVariable("cityName") String cityName){
+		return pincodeService.getPincodeAndCity(pincode,cityName);
 	}
 
 }

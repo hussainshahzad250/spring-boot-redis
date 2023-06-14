@@ -5,6 +5,9 @@ import com.example.dto.PincodeResponse;
 import com.example.entity.Pincode;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class PincodeAssembler {
 
@@ -23,5 +26,9 @@ public class PincodeAssembler {
         response.setAreaName(pincode.getAreaName());
         response.setCityName(pincode.getCityName());
         return response;
+    }
+
+    public List<PincodeResponse> entityToDtoList(List<Pincode> requests) {
+        return requests.parallelStream().map(this::entityToDto).collect(Collectors.toList());
     }
 }

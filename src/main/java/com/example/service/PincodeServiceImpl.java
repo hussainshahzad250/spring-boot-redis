@@ -1,10 +1,12 @@
 package com.example.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -59,5 +61,11 @@ public class PincodeServiceImpl implements PincodeService, Constant {
 			return response;
 		}
 		throw new BadRequestException("pincode not exist", HttpStatus.BAD_REQUEST);
+	}
+
+	@Cacheable(value = "cityAndPincode", key = "#pincode.concat(':').concat(#cityName)")
+	@Override
+	public List<PincodeResponse> getPincodeAndCity(String pincode, String cityName) {
+		return pincodeAssembler.entityToDtoList(pincodeRepository.findByPincodeAndCityName(pincode, cityName));
 	}
 }
